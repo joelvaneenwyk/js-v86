@@ -1,0 +1,116 @@
+# https://taskfile.dev
+
+version: "3"
+
+set: [pipefail]
+shopt: [globstar]
+dotenv:
+  - .env
+
+vars:
+  BUILD_DIR: "{{ .TASKFILE_DIR }}/build"
+  BIN_DIR: "{{ .BUILD_DIR }}/bin"
+
+  BREW: "/home/linuxbrew/.linuxbrew/bin/brew"
+  BREW_INSTALL_SCRIPT: "{{ .BIN_DIR }}/install-brew.sh"
+  BREW_INSTALL_URI: "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+
+  RUN_WINDOWS: "cmd /d /c"
+  RUN_UNIX: "sh -c"
+  RUN: '{{if eq OS "windows"}}{{.RUN_WINDOWS}}{{ else }}{{.RUN_UNIX}}{{ end }}'
+
+  DOTENV_VAULT: npx --yes dotenv-vault@latest
+
+  NPM: yarn
+  NPM_RUN: '{{ if eq .NPM "yarn" }}{{.NPM}}{{ else }}{{.NPM}} run{{ end }}'
+
+env:
+  NODE_OPTIONS: "--trace-deprecation --trace-warnings --max-old-space-size=2048"
+  ELECTRON_ENABLE_LOGGING: true
+  ELECTRON_RUN_AS_NODE: true
+
+tasks:
+  default:
+    cmds:
+      - task: build
+
+  # https://developers.google.com/closure/compiler
+  closure-install:
+    status:
+      - java --version
+      - brew --version
+      - closure-compiler --version
+    cmds:
+      - cmd: brew install closure-compiler
+
+  setup:
+    deps: [closure-install]
+    cmds:
+      - cmd: rustup target add wasm32-unknown-unknown
+
+  clean:
+    cmds:
+      - cmd: rm -rf "{{.TASKFILE_DIR}}/.yarn/"
+        platforms: [linux]
+      - cmd: rm -f "{{.TASKFILE_DIR}}/yarn.lock"
+        platforms: [linux]
+      - cmd: rm -f "{{.TASKFILE_DIR}}/package-lock.json"
+        platforms: [linux]
+
+  rebuild:
+    deps: [clean]
+    cmds:
+      - task: build
+
+  build:
+    deps: [setup]
+    cmds:
+      - cmd: make all
+
+  install:
+    cmds:
+      - cmd: "{{.NPM}} install"
+      - task: install-dependencies-ubuntu
+
+  install-dependencies-ubuntu:
+    platforms: [linux]
+    preconditions:
+      - apt-get --version
+      - sudo --version
+    status:
+      - rpm --version
+    cmds:
+      - cmd: sudo apt-get update
+      - cmd: sudo apt-get install -y rpm
+
+  dotenv-login:
+    internal: true
+    status:
+      - 'test -f "{{ .TASKFILE_DIR }}/.env.me"'
+    sources:
+      - .env.vault
+    generates:
+      - .env.me
+    cmds:
+      - cmd: "{{ .DOTENV_VAULT }} login --yes"
+
+  dotenv-push:
+    internal: true
+    deps: [dotenv-login]
+    preconditions:
+      - 'test -f "{{ .TASKFILE_DIR }}/.env"'
+      - 'test -f "{{ .TASKFILE_DIR }}/.env.me"'
+      - 'test -f "{{ .TASKFILE_DIR }}/.env.vault"'
+    cmds:
+      - cmd: "{{ .DOTENV_VAULT }} push --yes"
+
+  dotenv-pull:
+    deps: [dotenv-login]
+    status:
+      - 'test -f "{{ .TASKFILE_DIR }}/.env"'
+    sources:
+      - .env.vault
+    generates:
+      - .env
+    cmds:
+      - cmd: "{{ .DOTENV_VAULT }} pull --yes"
