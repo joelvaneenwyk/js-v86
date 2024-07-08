@@ -68,6 +68,7 @@ jobs:
             sudo curl bash \
             closure-compiler \
             clang-15
+          sudo ln -f -s /usr/bin/clang-15 /usr/bin/clang
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --verbose
           (
             echo "/bin/"
