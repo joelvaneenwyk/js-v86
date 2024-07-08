@@ -65,7 +65,7 @@ jobs:
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
-            sudo curl bash \
+            sudo curl bash time \
             closure-compiler \
             clang-15
           sudo ln -f -s /usr/bin/clang-15 /usr/bin/clang
@@ -160,7 +160,7 @@ jobs:
         run: make expect-tests
 
       - name: Upload the artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: v86
           path: |
@@ -174,16 +174,21 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
 
+    permissions:
+      contents: write
+
     steps:
       - name: Delete old release and tag
-        uses: dev-drprasad/delete-tag-and-release@v1.0.1
+        if: ${{ ! env.ACT }}
+        uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           delete_release: true
           tag_name: latest
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get artifacts
-        uses: actions/download-artifact@v3
+        if: ${{ ! env.ACT }}
+        uses: actions/download-artifact@v4
         with:
           name: v86
           path: ${{ env.BUILD_DIR }}
@@ -192,6 +197,7 @@ jobs:
         run: ls -R
 
       - name: Release to GitHub
+        if: ${{ ! env.ACT }}
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
@@ -201,3 +207,4 @@ jobs:
           body: ${{ github.event.head_commit.message }}
           artifacts: "${{ env.BUILD_DIR }}/libv86*.js,${{ env.BUILD_DIR }}/libv86*.js.map,${{ env.BUILD_DIR }}/v86*.wasm"
           prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
