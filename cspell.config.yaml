@@ -1,0 +1,8 @@
+version: "0.2"
+ignorePaths: []
+dictionaryDefinitions:
+  - name: js-v86
+    path: ./.vscode/js-v86.dict
+    addWords: true
+dictionaries:
+  - js-v86
