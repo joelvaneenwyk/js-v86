@@ -5,6 +5,7 @@ on:
   pull_request:
 
 env:
+  ACT:
   BUILD_DIR: build
   NODE_VERSION: 20
 
@@ -60,7 +61,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Act dependencies
-        if: ${{ env.ACT }} == 'true'
+        if: ${{ env.ACT }}
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
