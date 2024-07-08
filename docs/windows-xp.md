@@ -3,7 +3,7 @@
 You can download Windows 2000 from [WinWorld](https://winworldpc.com/download/413638c2-8d18-c39a-11c3-a4e284a2c3a5).
 Use QEMU to create `winxp.img`:
 
-```
+```bash
 qemu-img create winxp.img 2G
 qemu-system-x86_64 -m 512 -drive file=winxp.img,format=raw -cdrom en_windows_xp_professional_with_service_pack_3_x86_cd_vl_x14-73974.iso
 ```
@@ -22,8 +22,8 @@ Now, `winxp.img` is ready for v86. You can use [the website](https://copy.sh/v86
 Specify `winxp.img` as a hard disk, and optionally set the memory size to 512 MB.
 Or run it in a custom HTML file as described below.
 
-Get seabios.bin and vgabios.bin from [here](https://github.com/copy/v86/tree/master/bios),
-and get libv86.js and v86.wasm from [releases](https://github.com/copy/v86/releases/tag/latest).
+Get `seabios.bin` and `vgabios.bin` from [here](https://github.com/copy/v86/tree/master/bios),
+and get `libv86.js` and `v86.wasm` from [releases](https://github.com/copy/v86/releases/tag/latest).
 Create `winxp.htm` with this content (assuming all the files are in the same folder):
 
 ```html
@@ -58,12 +58,15 @@ onload = function()
 To open this HTML file locally, a HTTP server is needed. The standard Python server `python -m http.server` doesn't support HTTP range requests.
 You can use [http-server](https://www.npmjs.com/package/http-server) or [devd](https://github.com/cortesi/devd).
 Start the server (from the same folder as `winxp.htm`):
-```
+
+```bash
 npx http-server
 ```
-Open http://localhost:8080/winxp.htm in the browser.
+
+Open <http://localhost:8080/winxp.htm> in the browser.
 
 Windows XP load time (until start button becomes responsive) in Chromium on my computer:
+
 * 3 min second time
 * 4 min (first time or if cache is disabled)
 * 12 min second time if Network tab in Developer Tools is open

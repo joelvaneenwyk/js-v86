@@ -1,3 +1,5 @@
+# `js-v86` - x86 Virtualization in JavaScript
+
 [![Join the chat at https://gitter.im/copy/v86](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/copy/v86) or #v86 on [irc.libera.chat](https://libera.chat/)
 
 v86 emulates an x86-compatible CPU and hardware. Machine code is translated to
@@ -106,18 +108,18 @@ Here's an overview of the operating systems supported in v86:
 - SerenityOS works (only 32-bit versions).
 - [SkiftOS](https://skiftos.org/) works.
 
-You can get some information on the disk images here: https://github.com/copy/images.
+You can get some information on the disk images here: <https://github.com/copy/images>.
 
 ## How to build, run and embed?
 
 You need:
 
-- make
-- Rust with the wasm32-unknown-unknown target
-- A version of clang compatible with Rust
-- java (for Closure Compiler, not necessary when using `debug.html`)
-- nodejs (a recent version is required, v16.11.1 is known to be working)
-- To run tests: nasm, gdb, qemu-system, gcc, libc-i386 and rustfmt
+- `make`
+- `Rust` with the `wasm32-unknown-unknown` target
+- A version of `clang` compatible with `Rust`
+- `java` (for `Closure Compiler`, not necessary when using `debug.html`)
+- `nodejs` (a recent version is required, `v16.11.1` is known to be working)
+- To run tests: `nasm`, `gdb`, `qemu-system`, `gcc`, `libc-i386` and `rustfmt`
 
 See [tools/docker/test-image/Dockerfile](tools/docker/test-image/Dockerfile)
 for a full setup on Debian or
@@ -212,4 +214,4 @@ Shoot me an email to `copy@copy.sh`. Please report bugs on GitHub.
 
 ## Author
 
-Fabian Hemmer (https://copy.sh/, `copy@copy.sh`)
+Fabian Hemmer (<https://copy.sh/>, `copy@copy.sh`)

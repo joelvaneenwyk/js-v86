@@ -1,6 +1,6 @@
 In order to create a Linux image that can mount the 9p file system, add the following lines to the kernel configuration:
 
-```
+```bash
 CONFIG_NET_9P=y
 CONFIG_NET_9P_VIRTIO=y
 CONFIG_NET_9P_DEBUG=y

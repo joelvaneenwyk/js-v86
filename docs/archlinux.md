@@ -6,7 +6,7 @@ faster way to automatically build Linux images for v86.
 Choosing an installer ISO
 -------------------------
 
-Download Arch Linux 32 from  https://archlinux32.org.
+Download Arch Linux 32 from  <https://archlinux32.org>.
 
 Basic installation using QEMU
 -----------------------
@@ -44,6 +44,7 @@ Installing the ISO by hand takes a long time if you intend to recreate the image
 [Packer](https://www.packer.io/docs/builders/qemu.html) is a tool that lets you boot an ISO in any of multiple emulators (so QEMU in our case) and send pre-scripted keystrokes to bootstrap and SSH server. Once the SSH connection is established a script can be started for further provisioning.
 
 Create a template for automating the base installation:
+
 ```sh
 mkdir -p packer
 cat > packer/template.json << 'EOF'
@@ -98,6 +99,7 @@ After gaining SSH connectivity to the VM, packer will run the `scripts/provision
 ### Creating the Arch Linux installation script
 
 Create a script for your Arch Linux installation. This runs in the live Arch Linux environment, so you need to partition the disk, do a pacstrap, and install a bootloader.
+
 ```sh
 mkdir -p packer/scripts
 ### Write your own or copy paste the example below
@@ -105,6 +107,7 @@ vim packer/scripts/provision.sh
 ```
 
 An example script to install Arch Linux with the root mounted using the 9p network filesystem:
+
 ```sh
 #!/bin/bash
 echo "Creating a GPT partition on /dev/sda1"
@@ -179,7 +182,7 @@ mkdir -p /mnt/etc/initcpio/install
 cat << 'EOF' > /mnt/etc/initcpio/install/9p_root
 #!/bin/bash
 build() {
-	add_runscript
+ add_runscript
 }
 EOF
 
@@ -310,6 +313,7 @@ Now that we have an image that contains a filesystem, we can convert that filesy
 To do so, we need to mount the image once and create a json mapping of the filesystem. The following script shows how to map the filesystem in an automated fashion.
 
 Create a script to builds the image and then creates v86 compatible artifacts:
+
 ```sh
 vim build.sh
 ```
@@ -406,6 +410,7 @@ We can then edit `examples/arch.html`, we have two options:
   acpi: false,
   autostart: true,
   ```
+
 2. Boot the Arch Linux from the qemu raw disk image:
 
   ```sh
@@ -444,6 +449,7 @@ If you refresh `http://localhost:8000/examples/arch.html` you will see that the 
 ### Networking
 
 The emulator can emulate a network card. For more information [look at the networking documentation](https://github.com/copy/v86/blob/master/docs/networking.md). To set up networking in the VM, add the following item to the `V86` array in the `examples/arch.html` file:
+
 ```sh
 network_relay_url: "ws://localhost:8080/",
 ```
@@ -453,17 +459,20 @@ This will make the emulator try to connect to a [WebSockets proxy](https://githu
 ```sh
 sudo docker run --privileged -p 8080:80 --name relay bennottelling/websockproxy
 ```
+
 **NOTE:** original `benjamincburns/jor1k-relay:latest` has throttling built-in by default which will degrade the networking. `bennottelling/websockproxy` has this throttling removed via [websockproxy/issues/4#issuecomment-317255890](https://github.com/benjamincburns/websockproxy/issues/4#issuecomment-317255890).
 
 You can check if the relay is running correctly by going to `http://localhost:8080/` in your browser. There you should see a message that reads `Can "Upgrade" only to "Websocket".`.
 
 Now you should be able to get network connectivity in the virtual machine. If you are restoring from a saved state, you might need to first run:
+
 ```sh
 ip link set enp0s5 down
 rmmod ne2k-pci
 ```
 
 To bring the network up, run:
+
 ```sh
 modprobe ne2k-pci
 dhcpcd -w4 enp0s5

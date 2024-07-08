@@ -5,7 +5,7 @@ The major limitations of WebAssembly are (for the purpose of making emulators wi
 
 - structured control flow (no arbitrary jumps)
 - no control over registers (you can't keep hardware registers in wasm locals across functions)
-- no mmap (paging needs to be fully emulated)
+- no `mmap` (paging needs to be fully emulated)
 - no patching
 - module generation is fairly slow, but at least it's asynchronous, so other things can keep running
 - there is some memory overhead per module, so you can't generate more than a few thousand
