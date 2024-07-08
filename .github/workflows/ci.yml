@@ -4,6 +4,11 @@ on:
   push:
   pull_request:
 
+env:
+  ACT: false
+  BUILD_DIR: build
+  NODE_VERSION: 20
+
 jobs:
   jshint:
     name: JSHint
@@ -12,8 +17,40 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run JSHint
-        run: sudo npm install -g jshint; make jshint
+      - name: Install Act dependencies
+        if: ${{ env.ACT }}
+        run: |
+          set -eax -o pipefail
+
+          apt-get update
+          apt-get install --yes --no-install-recommends \
+            sudo curl bash
+          echo "/usr/bin" >> $GITHUB_PATH
+
+          # installs fnm (Fast Node Manager)
+          curl -fsSL https://fnm.vercel.app/install | bash -s
+
+          # download and install Node.js
+          FNM_PATH="/root/.local/share/fnm"
+          if [ -d "$FNM_PATH" ]; then
+            export PATH="$FNM_PATH:$PATH"
+            eval "$(fnm env)"
+          fi
+          fnm use --install-if-missing ${{ env.NODE_VERSION }}
+          echo "$FNM_PATH" >> $GITHUB_PATH
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          check-latest: true
+
+      - name: Install and Run JSHint
+        shell: bash
+        run: |
+          if ! sudo npm install -g jshint 2>/dev/null; then
+            npm install -g jshint
+          fi
+          make jshint
 
   test:
     runs-on: ubuntu-latest
@@ -21,6 +58,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install Act dependencies
+        if: ${{ env.ACT }}
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends \
+            sudo curl bash closure-compiler
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --verbose
+          (
+            echo "/bin/"
+            echo "/usr/bin/"
+            echo "$HOME/.local/bin/"
+            echo "$HOME/.cargo/bin"
+          ) >> $GITHUB_PATH
 
       - name: Setup toolchain
         run: |
@@ -40,7 +91,7 @@ jobs:
         run: make all
 
       - name: Build fallback
-        run: make build/v86-fallback.wasm
+        run: make "${{ env.BUILD_DIR }}/v86-fallback.wasm"
 
       - name: rustfmt check
         run: make rustfmt
@@ -63,7 +114,7 @@ jobs:
         uses: actions/cache@v3
         id: cache-nasmtests
         with:
-          path: tests/nasm/build/
+          path: tests/nasm/${{ env.BUILD_DIR }}/
           key: ${{ runner.os }}-nasmtests
 
       - name: Run nasmtests
@@ -109,9 +160,9 @@ jobs:
         with:
           name: v86
           path: |
-            build/libv86*.js
-            build/libv86*.js.map
-            build/v86*.wasm
+            ${{ env.BUILD_DIR }}/libv86*.js
+            ${{ env.BUILD_DIR }}/libv86*.js.map
+            ${{ env.BUILD_DIR }}/v86*.wasm
 
   upload:
     name: Upload release
@@ -131,7 +182,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: v86
-          path: build
+          path: ${{ env.BUILD_DIR }}
 
       - name: Display structure of downloaded files
         run: ls -R
@@ -143,5 +194,5 @@ jobs:
           tag: latest
           commit: master
           body: ${{ github.event.head_commit.message }}
-          artifacts: "build/libv86*.js,build/libv86*.js.map,build/v86*.wasm"
+          artifacts: "${{ env.BUILD_DIR }}/libv86*.js,${{ env.BUILD_DIR }}/libv86*.js.map,${{ env.BUILD_DIR }}/v86*.wasm"
           prerelease: true
