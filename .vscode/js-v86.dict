@@ -142,6 +142,7 @@ tmpfs
 uart
 Uniprocessor
 unsel
+venv
 vesamenu
 vgabios
 virtio

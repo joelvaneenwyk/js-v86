@@ -1,8 +1,23 @@
 version: "0.2"
-ignorePaths: []
+ignorePaths:
+  - .venv/
+  - node_modules/
+  - .git/
+  - .build/
+  - build/
+  - closure-compiler/
+  - Cargo.lock
+  - bios/*.bin
 dictionaryDefinitions:
   - name: js-v86
     path: ./.vscode/js-v86.dict
     addWords: true
+  - name: js-v86-extras
+    path: ./.vscode/js-v86-extras.dict
+    addWords: true
 dictionaries:
   - js-v86
+  - js-v86-extras
+caseSensitive: false
+enabled: true
+useGitignore: true
