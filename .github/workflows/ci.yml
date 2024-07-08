@@ -101,7 +101,7 @@ jobs:
         run: make rustfmt
 
       - name: Fetch kvm-unit-test cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-kvm-unit-test
         with:
           path: tests/kvm-unit-tests/
@@ -115,7 +115,7 @@ jobs:
         run: tests/kvm-unit-tests/run.js tests/kvm-unit-tests/x86/realmode.flat
 
       - name: Fetch namsmtests cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-nasmtests
         with:
           path: tests/nasm/${{ env.BUILD_DIR }}/
@@ -131,7 +131,7 @@ jobs:
         run: make rust-test
 
       - name: Fetch image cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-images
         with:
           path: images/
