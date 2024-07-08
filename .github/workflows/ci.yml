@@ -194,9 +194,10 @@ jobs:
       - name: Release to GitHub
         uses: ncipollo/release-action@v1
         with:
+          generateReleaseNotes: true
+          commit: ${{ github.sha }}
+          tag: ${{ github.ref_name }}
           name: Latest Release
-          tag: latest
-          commit: master
           body: ${{ github.event.head_commit.message }}
           artifacts: "${{ env.BUILD_DIR }}/libv86*.js,${{ env.BUILD_DIR }}/libv86*.js.map,${{ env.BUILD_DIR }}/v86*.wasm"
           prerelease: true
