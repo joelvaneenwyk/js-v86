@@ -16,9 +16,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+            submodules: recursive
+            fetch-depth: 0
 
       - name: Install Act dependencies
-        if: ${{ env.ACT }}
+        if: ${{ env.ACT }} == 'true'
         run: |
           set -eax -o pipefail
 
@@ -47,9 +50,7 @@ jobs:
       - name: Install and Run JSHint
         shell: bash
         run: |
-          if ! sudo npm install -g jshint 2>/dev/null; then
-            npm install -g jshint
-          fi
+          sudo npm install -g jshint 2>/dev/null || npm install -g jshint
           make jshint
 
   test:
@@ -60,11 +61,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Act dependencies
-        if: ${{ env.ACT }}
+        if: ${{ env.ACT }} == 'true'
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
-            sudo curl bash closure-compiler
+            sudo curl bash \
+            closure-compiler \
+            clang-15
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --verbose
           (
             echo "/bin/"
@@ -168,7 +171,7 @@ jobs:
     name: Upload release
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
 
     steps:
       - name: Delete old release and tag
