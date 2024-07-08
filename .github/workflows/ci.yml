@@ -54,6 +54,7 @@ jobs:
           make jshint
 
   test:
+    needs: jshint
     runs-on: ubuntu-latest
     name: Build and test
     steps:
@@ -181,9 +182,10 @@ jobs:
       - name: Delete old release and tag
         if: ${{ ! env.ACT }}
         uses: dev-drprasad/delete-tag-and-release@v1.1
+        continue-on-error: true
         with:
           delete_release: true
-          tag_name: latest
+          tag_name: ${{ github.ref_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get artifacts
@@ -201,10 +203,9 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
+          prerelease: true
           commit: ${{ github.sha }}
           tag: ${{ github.ref_name }}
-          name: Latest Release
           body: ${{ github.event.head_commit.message }}
           artifacts: "${{ env.BUILD_DIR }}/libv86*.js,${{ env.BUILD_DIR }}/libv86*.js.map,${{ env.BUILD_DIR }}/v86*.wasm"
-          prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
