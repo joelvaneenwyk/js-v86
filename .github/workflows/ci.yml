@@ -5,7 +5,6 @@ on:
   pull_request:
 
 env:
-  ACT: false
   BUILD_DIR: build
   NODE_VERSION: 20
 
@@ -21,7 +20,7 @@ jobs:
             fetch-depth: 0
 
       - name: Install Act dependencies
-        if: ${{ env.ACT }} == 'true'
+        if: ${{ env.ACT }}
         run: |
           set -eax -o pipefail
 
